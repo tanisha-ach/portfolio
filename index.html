@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SightLine AI — Home Inspection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,700;1,700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── TOKENS ─── */
+    :root {
+      --bg:          #EDE4CE;   /* warm light beige */
+      --bg-raised:   #E6DBBD;   /* slightly deeper for cards */
+      --terra:       #8B3A2A;   /* terracotta accent */
+      --teal:        #005F55;   /* high-contrast teal for text/eyebrow */
+      --cyan-neon:   #00F5D4;   /* neon — button bg, glows, overlays only */
+      --magenta:     #C41050;   /* darkened magenta for light bg */
+      --magenta-neon:#FF2D78;   /* neon — glows & overlays only */
+      --gold-deco:   #E8B94F;   /* bright gold for brackets & borders */
+      --gold-text:   #9A6405;   /* darker gold safe for text on beige */
+      --text-dark:   #1C0A06;   /* near-black warm — headlines */
+      --text-body:   #4A3020;   /* medium warm — body */
+      --text-muted:  #7A5840;   /* muted warm — supporting */
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      font-family: 'Space Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: var(--text-body);
+    }
+
+    /* Halftone — subtle on light bg */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(0,0,0,0.09) 1px, transparent 1px);
+      background-size: 14px 14px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* CRT scanlines — very subtle on light */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.018) 3px,
+        rgba(0,0,0,0.018) 4px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ─── HERO WRAPPER ─── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 4rem 6vw;
+      z-index: 2;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1.08fr;
+      gap: 5rem;
+      align-items: start;
+      width: 100%;
+      max-width: 1380px;
+      margin: 0 auto;
+    }
+
+    /* ─── LEFT: COPY ─── */
+    .hero-left { position: relative; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 1.8rem;
+    }
+    .eyebrow::before {
+      content: '';
+      display: block;
+      width: 26px; height: 1px;
+      background: var(--teal);
+    }
+
+    /* Gold corner-bracket frame */
+    .bracket-frame {
+      position: relative;
+      padding: 1.8rem 1.8rem 1.8rem 2rem;
+      margin-bottom: 2rem;
+    }
+    .bracket-frame::before,
+    .bracket-frame::after,
+    .bracket-frame .br-tr,
+    .bracket-frame .br-bl {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+    }
+    .bracket-frame::before { top:0;    left:0;  border-top:2px solid var(--terra); border-left:2px solid var(--terra); }
+    .bracket-frame::after  { bottom:0; right:0; border-bottom:2px solid var(--terra); border-right:2px solid var(--terra); }
+    .bracket-frame .br-tr  { top:0;    right:0; border-top:2px solid var(--terra); border-right:2px solid var(--terra); }
+    .bracket-frame .br-bl  { bottom:0; left:0;  border-bottom:2px solid var(--terra); border-left:2px solid var(--terra); }
+
+    .headline {
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 700;
+      font-size: clamp(3rem, 5.5vw, 5.2rem);
+      line-height: 0.96;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--text-dark);
+    }
+    .headline em {
+      font-style: italic;
+      color: var(--terra);
+      display: block;
+    }
+    .headline .hl-teal {
+      color: var(--teal);
+      display: block;
+    }
+
+    .subhead-list {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+      margin-bottom: 2.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .subhead-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      font-size: clamp(0.72rem, 1.15vw, 0.88rem);
+      line-height: 1.7;
+      color: var(--text-body);
+    }
+
+    /* Retro scan-target bullet — mirrors the ping markers on the photo */
+    .subhead-list li::before {
+      content: '';
+      display: block;
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      margin-top: 0.18em;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6.2' fill='none' stroke='%238B3A2A' stroke-width='1.3'/%3E%3Ccircle cx='8' cy='8' r='1.9' fill='%238B3A2A'/%3E%3Cline x1='8' y1='0' x2='8' y2='2.8' stroke='%238B3A2A' stroke-width='1.3'/%3E%3Cline x1='8' y1='13.2' x2='8' y2='16' stroke='%238B3A2A' stroke-width='1.3'/%3E%3Cline x1='0' y1='8' x2='2.8' y2='8' stroke='%238B3A2A' stroke-width='1.3'/%3E%3Cline x1='13.2' y1='8' x2='16' y2='8' stroke='%238B3A2A' stroke-width='1.3'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-size: contain;
+    }
+
+    /* CTA row */
+    .cta-row {
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+      margin-bottom: 3.2rem;
+    }
+
+    .btn-scan {
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #FBF6EE;
+      background: var(--terra);
+      border: none;
+      padding: 1rem 2.4rem;
+      border-radius: 100px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 0 18px rgba(139,58,42,0.35),
+        0 0 44px rgba(139,58,42,0.12),
+        inset 0 1px 0 rgba(255,255,255,0.18);
+      transition: box-shadow 0.25s, transform 0.15s;
+    }
+    .btn-scan::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
+      transform: translateX(-100%);
+    }
+    .btn-scan:hover {
+      box-shadow:
+        0 0 28px rgba(139,58,42,0.55),
+        0 0 60px rgba(139,58,42,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.18);
+      transform: translateY(-2px);
+    }
+    .btn-scan:hover::after {
+      transform: translateX(200%);
+      transition: transform 0.45s ease;
+    }
+
+    .btn-ghost {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--text-dark);
+      background: none;
+      border: 1.5px solid rgba(28,10,6,0.28);
+      border-radius: 100px;
+      padding: 0.9rem 1.8rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .btn-ghost:hover {
+      border-color: var(--terra);
+      color: var(--terra);
+      background: rgba(139,58,42,0.05);
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      gap: 2.5rem;
+      padding-top: 2.5rem;
+      border-top: 1.5px solid rgba(28,10,6,0.1);
+    }
+    .stat-num {
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 700;
+      font-size: 1.7rem;
+      color: var(--teal);
+      display: block;
+      line-height: 1.1;
+    }
+    .stat-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    /* ─── RIGHT: PHOTO PANEL ─── */
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    /* ANALYZING HUD widget */
+    .analyzing-widget {
+      align-self: flex-start;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: rgba(18,8,4,0.82);
+      border: 1px solid rgba(0,245,212,0.55);
+      border-radius: 4px;
+      padding: 0.4rem 0.9rem;
+      box-shadow: 0 0 14px rgba(0,245,212,0.2);
+      backdrop-filter: blur(4px);
+    }
+    .led-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--cyan-neon);
+      box-shadow: 0 0 8px var(--cyan-neon);
+      flex-shrink: 0;
+      animation: led-blink 1.1s ease-in-out infinite;
+    }
+    @keyframes led-blink {
+      0%,100% { opacity:1; box-shadow:0 0 8px var(--cyan-neon); }
+      50%     { opacity:0.3; box-shadow:0 0 2px var(--cyan-neon); }
+    }
+    .led-text {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      color: var(--cyan-neon);
+    }
+    .led-cursor { animation: cur-blink 0.75s steps(1) infinite; }
+    @keyframes cur-blink {
+      0%,100% { opacity:1; }
+      50%     { opacity:0; }
+    }
+
+    /* House photo wrapper — gives space for badges to extend */
+    .house-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      padding-right: 4px; /* small buffer, badges use position absolute */
+    }
+
+    /* Photo frame */
+    .photo-frame {
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid rgba(232,185,79,0.45);
+      box-shadow:
+        0 16px 56px rgba(28,10,6,0.16),
+        0 0 0 1px rgba(232,185,79,0.12);
+    }
+
+    .house-photo {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+    }
+
+    /* Blueprint grid overlay on photo */
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,245,212,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,212,0.045) 1px, transparent 1px);
+      background-size: 26px 26px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Slight colour-grade to tie photo to palette */
+    .photo-grade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        160deg,
+        rgba(139,58,42,0.08) 0%,
+        transparent 55%,
+        rgba(0,245,212,0.04) 100%
+      );
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* Scan beam */
+    .scan-beam {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 90px;
+      background: linear-gradient(
+        to right,
+        transparent,
+        rgba(0,245,212,0.04) 28%,
+        rgba(0,245,212,0.5)  50%,
+        rgba(0,245,212,0.04) 72%,
+        transparent
+      );
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    /* Gold frame corner brackets on photo */
+    .frame-corners span {
+      position: absolute;
+      width: 18px; height: 18px;
+      z-index: 6;
+    }
+    .fc-tl { top:6px;    left:6px;  border-top:2px solid var(--gold-deco); border-left:2px solid var(--gold-deco); }
+    .fc-tr { top:6px;    right:6px; border-top:2px solid var(--gold-deco); border-right:2px solid var(--gold-deco); }
+    .fc-bl { bottom:6px; left:6px;  border-bottom:2px solid var(--gold-deco); border-left:2px solid var(--gold-deco); }
+    .fc-br { bottom:6px; right:6px; border-bottom:2px solid var(--gold-deco); border-right:2px solid var(--gold-deco); }
+
+    /* ── Ping markers on photo ── */
+    .ping-wrap {
+      position: absolute;
+      width: 44px; height: 44px;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: opacity 0.25s;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .ping-wrap.active { opacity: 1; }
+
+    .ping-dot {
+      position: absolute;
+      top:50%; left:50%;
+      transform: translate(-50%,-50%);
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--magenta-neon);
+      box-shadow: 0 0 8px var(--magenta-neon), 0 0 18px var(--magenta-neon);
+    }
+    .ping-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1.5px solid var(--magenta-neon);
+      top:50%; left:50%;
+      transform: translate(-50%,-50%);
+      box-shadow: 0 0 6px var(--magenta-neon);
+    }
+    .ring-sm { width:18px; height:18px; }
+    .ring-lg {
+      width:40px; height:40px;
+      animation: ping-ripple 1.1s ease-out infinite;
+    }
+    @keyframes ping-ripple {
+      0%   { transform:translate(-50%,-50%) scale(0.55); opacity:0.9; }
+      100% { transform:translate(-50%,-50%) scale(1.6);  opacity:0;   }
+    }
+
+    /* ── Defect badges (float outside / over photo edge) ── */
+    .defect-badge {
+      position: absolute;
+      background: rgba(18,6,14,0.90);
+      border: 1px solid var(--magenta);
+      border-radius: 3px;
+      padding: 0.3rem 0.65rem 0.3rem 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.42rem;
+      box-shadow: 0 0 14px rgba(196,16,80,0.35), inset 0 0 6px rgba(255,45,120,0.06);
+      opacity: 0;
+      transform: translateX(10px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 10;
+    }
+    .defect-badge.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .badge-icon {
+      color: var(--magenta-neon);
+      font-size: 0.6rem;
+      font-weight: 700;
+    }
+    .badge-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.07em;
+      color: #F5ECD7;
+      overflow: hidden;
+      white-space: nowrap;
+      width: 0;
+    }
+    .defect-badge.show .badge-text {
+      animation: type-in 0.5s steps(16) 0.15s forwards;
+    }
+    @keyframes type-in {
+      from { width: 0; }
+      to   { width: 9.5em; }
+    }
+
+    /* Badge positions relative to house-wrap */
+    .badge-roof  { top: 16%;  right: -2%; }
+    .badge-wall  { top: 50%;  right: -2%; }
+    .badge-crawl { bottom: 16%; right: -2%; }
+
+    /* Connector ticks */
+    .badge-tick {
+      position: absolute;
+      width: 20px; height: 1px;
+      background: var(--magenta-neon);
+      box-shadow: 0 0 4px var(--magenta-neon);
+      opacity: 0;
+      transition: opacity 0.3s 0.1s;
+      z-index: 9;
+    }
+    .defect-badge.show + .badge-tick { opacity: 0.5; }
+    .tick-roof  { top: calc(16% + 11px); right: calc(-2% + 110px); }
+    .tick-wall  { top: calc(50% + 11px); right: calc(-2% + 110px); }
+    .tick-crawl { bottom: calc(16% + 11px); right: calc(-2% + 110px); }
+
+    .hero-tag {
+      font-size: 0.58rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 920px) {
+      .hero-inner {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+      .hero-right { order: -1; }
+      .house-wrap { max-width: 420px; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-inner">
+
+    <!-- ══════ LEFT: COPY ══════ -->
+    <div class="hero-left">
+      <div class="eyebrow">Computer Vision · AI Report Engine</div>
+
+      <div class="bracket-frame">
+        <span class="br-tr"></span>
+        <span class="br-bl"></span>
+        <h1 class="headline">
+          See Every<br>
+          <em>Crack</em>
+          <span class="hl-teal">Before It</span>
+          Costs&nbsp;You.
+        </h1>
+      </div>
+
+      <ul class="subhead-list">
+        <li>AI-powered inspection reports in minutes — not days.</li>
+        <li>Crawlspace, roof &amp; foundation analyzed by computer vision.</li>
+        <li>Every defect documented. Every report standardized.</li>
+      </ul>
+
+      <div class="cta-row">
+        <button class="btn-scan">Scan My Home</button>
+        <button class="btn-ghost">See how it works →</button>
+      </div>
+
+      <div class="stats-row">
+        <div>
+          <span class="stat-num">98.4%</span>
+          <span class="stat-label">Defect accuracy</span>
+        </div>
+        <div>
+          <span class="stat-num">11 min</span>
+          <span class="stat-label">Avg. report time</span>
+        </div>
+        <div>
+          <span class="stat-num">3,400+</span>
+          <span class="stat-label">Homes inspected</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ RIGHT: PHOTO PANEL ══════ -->
+    <div class="hero-right">
+
+      <div class="analyzing-widget">
+        <div class="led-dot"></div>
+        <div class="led-text" id="ledText">ANALYZING...<span class="led-cursor"> ▮</span></div>
+      </div>
+
+      <div class="house-wrap" id="houseWrap">
+
+        <!-- Real house photo with scan tech overlays -->
+        <div class="photo-frame" id="photoFrame">
+
+          <img
+            class="house-photo"
+            src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=900&q=80"
+            alt="Suburban house undergoing AI inspection"
+          />
+
+          <!-- Atmosphere overlays -->
+          <div class="grid-overlay"></div>
+          <div class="photo-grade"></div>
+
+          <!-- Animated scan beam -->
+          <div class="scan-beam" id="scanBeam"></div>
+
+          <!-- Gold corner brackets -->
+          <div class="frame-corners">
+            <span class="fc-tl"></span>
+            <span class="fc-tr"></span>
+            <span class="fc-bl"></span>
+            <span class="fc-br"></span>
+          </div>
+
+          <!-- Ping markers (% positions on the photo) -->
+          <!-- Roof area -->
+          <div class="ping-wrap" id="ping1" style="top:22%; left:62%;">
+            <div class="ping-ring ring-lg"></div>
+            <div class="ping-ring ring-sm"></div>
+            <div class="ping-dot"></div>
+          </div>
+          <!-- Wall / siding area -->
+          <div class="ping-wrap" id="ping2" style="top:55%; left:74%;">
+            <div class="ping-ring ring-lg"></div>
+            <div class="ping-ring ring-sm"></div>
+            <div class="ping-dot"></div>
+          </div>
+          <!-- Foundation / base area -->
+          <div class="ping-wrap" id="ping3" style="top:80%; left:38%;">
+            <div class="ping-ring ring-lg"></div>
+            <div class="ping-ring ring-sm"></div>
+            <div class="ping-dot"></div>
+          </div>
+
+        </div><!-- /photo-frame -->
+
+        <!-- Defect badges floating to the right of the photo -->
+        <div class="defect-badge badge-roof" id="badge1">
+          <span class="badge-icon">!</span>
+          <span class="badge-text">RIDGE MOISTURE</span>
+        </div>
+        <div class="badge-tick tick-roof"></div>
+
+        <div class="defect-badge badge-wall" id="badge2">
+          <span class="badge-icon">!</span>
+          <span class="badge-text">SIDING GAP</span>
+        </div>
+        <div class="badge-tick tick-wall"></div>
+
+        <div class="defect-badge badge-crawl" id="badge3">
+          <span class="badge-icon">!</span>
+          <span class="badge-text">FOUNDATION CRACK</span>
+        </div>
+        <div class="badge-tick tick-crawl"></div>
+
+      </div><!-- /house-wrap -->
+
+      <div class="hero-tag">Sightline AI · Vision Engine v2.4 · 3,400+ Inspections</div>
+
+    </div><!-- /hero-right -->
+
+  </div><!-- /hero-inner -->
+</section>
+
+<script>
+  /* ── SCAN BEAM ─────────────────────────────────────────── */
+  const beam      = document.getElementById('scanBeam');
+  const frame     = document.getElementById('photoFrame');
+  const BEAM_W    = 90;
+  let   frameW    = frame.offsetWidth;
+  let   beamLeft  = -BEAM_W;
+  let   dir       = 1;
+  const SPEED     = 1.4;
+
+  // Defect anchors as % of frame width (matches ping left% values)
+  const defects = [
+    { pct: 0.62, pingId: 'ping1', badgeId: 'badge1', triggered: false },
+    { pct: 0.74, pingId: 'ping2', badgeId: 'badge2', triggered: false },
+    { pct: 0.38, pingId: 'ping3', badgeId: 'badge3', triggered: false },
+  ];
+
+  function triggerDefect(d) {
+    if (d.triggered) return;
+    d.triggered = true;
+    document.getElementById(d.pingId).classList.add('active');
+    setTimeout(() => {
+      document.getElementById(d.badgeId).classList.add('show');
+    }, 320);
+  }
+
+  function resetAll() {
+    defects.forEach(d => {
+      d.triggered = false;
+      document.getElementById(d.pingId).classList.remove('active');
+      document.getElementById(d.badgeId).classList.remove('show');
+    });
+  }
+
+  window.addEventListener('resize', () => { frameW = frame.offsetWidth; });
+
+  function tick() {
+    beamLeft += SPEED * dir;
+
+    if (beamLeft > frameW + BEAM_W) {
+      dir = -1;
+      setTimeout(resetAll, 900);
+    }
+    if (beamLeft < -(BEAM_W * 2)) {
+      dir = 1;
+    }
+
+    beam.style.left = (beamLeft - BEAM_W / 2) + 'px';
+
+    // Trigger when beam centre crosses a defect x position
+    const cx = beamLeft;
+    defects.forEach(d => {
+      const defectX = d.pct * frameW;
+      if (!d.triggered && Math.abs(cx - defectX) < 24) {
+        triggerDefect(d);
+      }
+    });
+
+    requestAnimationFrame(tick);
+  }
+
+  tick();
+
+  /* ── LED STATUS CYCLE ──────────────────────────────────── */
+  const ledEl  = document.getElementById('ledText');
+  const phases = [
+    'ANALYZING...',
+    'SCANNING ROOF',
+    'CHECKING WALLS',
+    'CRAWLSPACE OK',
+    'REPORT READY ',
+  ];
+  let phaseIdx = 0;
+
+  setInterval(() => {
+    phaseIdx = (phaseIdx + 1) % phases.length;
+    ledEl.innerHTML = phases[phaseIdx] + '<span class="led-cursor"> ▮</span>';
+  }, 2600);
+</script>
+
+</body>
+</html>
