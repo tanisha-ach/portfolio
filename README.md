@@ -73,7 +73,7 @@ The result is interfaces that have a genuine point of view — not AI-generated 
 ## Background
 
 - **6+ years** enterprise UX — IBM, Lowe's, Mondelez, AMEX, GSK
-- **MS Information Science**, UT Austin (GPA 4.0, Expected May 2026)
+- **MS Information Science**, UT Austin 
 - **CPACC Certified** — Accessibility Core Competencies
 - Selected wins: FinTech app 3.8 → 4.5★ (11M users) · $6M super-app · $200M Lowe's online sales contribution · IBM watsonx Code Assistant pre-launch UX
 
