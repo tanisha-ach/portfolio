@@ -23,6 +23,20 @@ Each project here began with a real design problem, was prototyped in Figma, the
 
 ---
 
+## Site Structure
+
+The root `index.html` is now a landing page with thumbnail previews and links to each project.
+Each project lives in its own folder with its own `index.html` file.
+
+On GitHub Pages or another static host, this gives every project a distinct URL:
+
+```
+/                 -> portfolio landing page
+/sightline-hero/  -> SightLine AI project page
+```
+
+---
+
 ## Projects
 
 ---
@@ -41,7 +55,7 @@ Each project here began with a real design problem, was prototyped in Figma, the
 - LED status widget cycling through inspection phases
 - Fully responsive two-column layout
 
-**[Live Demo](YOUR_LINK)** · **[View Code](./sightline-hero/)**
+**[Live Demo](./sightline-hero/)** · **[View Code](./sightline-hero/index.html)**
 
 ---
 
